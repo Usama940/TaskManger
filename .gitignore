@@ -1,6 +1,12 @@
-# Node modules
-node_modules/
-# Backend folder
-Backend/
+# Node modules (ignore backend + frontend dono ke)
+Backend/node_modules/
+Forntend/node_modules/
+
 # Environment variables
 .env
+Forntend/.env
+Backend/.env
+
+# Logs
+logs
+*.log
