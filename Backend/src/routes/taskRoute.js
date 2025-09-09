@@ -3,15 +3,15 @@ import { protect } from "../middlewere/userAuthmiddle.js";
 import {
   postTask,
   getTasks,
-  // updateTask,
-  // deleteTask,
+  updateTask,
+  deleteTask,
 } from "../controllers/taskController.js";
 
 const router = express.Router();
 
 router.post("/tasks", protect, postTask);
 router.get("/tasks", protect, getTasks);
-// router.delete("/tasks:id", protect, deleteTask);
-// router.put("/tasks:id", protect, updateTask);
+router.put("/tasks/:id", protect, updateTask);
+router.delete("/tasks/:id", protect, deleteTask);
 
 export default router;

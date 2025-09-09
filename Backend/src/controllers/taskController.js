@@ -48,3 +48,74 @@ export const getTasks = async (req, res) => {
       .json({ message: "Internal server error at task getting" });
   }
 };
+
+export const updateTask = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { id: taskId } = req.params;
+    const { title, description, status } = req.body;
+
+    if (!userId) {
+      return res.status(400).json({ message: "User ID missing" });
+    }
+
+    if (!taskId) {
+      return res.status(400).json({ message: "Task ID missing" });
+    }
+
+    // Only allow updating these fields
+    const updateData = {};
+    if (title) updateData.title = title;
+    if (description) updateData.description = description;
+    if (status) updateData.status = status;
+
+    const updatedTask = await taskModel.findOneAndUpdate(
+      { _id: taskId, user: userId.toString() },
+      updateData,
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedTask) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+
+    return res.status(200).json(updatedTask);
+  } catch (error) {
+    console.error("Error at updateTask:", error.message);
+    return res
+      .status(500)
+      .json({ message: "Internal server error while updating task" });
+  }
+};
+
+export const deleteTask = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    let { id: taskId } = req.params;
+
+    if (!userId || !taskId) {
+      return res
+        .status(400)
+        .json({ message: "Task ID and User ID are required" });
+    }
+
+    const deletedTask = await taskModel.findOneAndDelete({
+      _id: taskId,
+      user: userId,
+    });
+
+    if (!deletedTask) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+
+    return res.status(200).json({
+      message: "Task deleted successfully",
+      deletedTask,
+    });
+  } catch (error) {
+    console.error("Error at deleteTask:", error);
+    return res
+      .status(500)
+      .json({ message: "Internal server error while deleting task" });
+  }
+};
