@@ -1,5 +1,8 @@
 import { generateToken } from "../lib/Token.js";
 import User from "../models/userAuth.model.js";
+import bcrypt from "bcrypt";
+
+const saltRounds = 10;
 
 export const signup = async (req, res) => {
   const { name, email, password } = req.body;
@@ -20,7 +23,9 @@ export const signup = async (req, res) => {
       return res.status(400).json({ message: "Email already exists" });
     }
 
-    const newUser = new User({ name, email, password });
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+    const newUser = new User({ name, email, password: hashedPassword });
     await newUser.save();
 
     return res.status(201).json({
@@ -50,7 +55,8 @@ export const login = async (req, res) => {
       return res.status(400).json({ message: "User not found" });
     }
 
-    if (user.password !== password) {
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
       return res.status(400).json({ message: "Invalid email or password" });
     }
 
