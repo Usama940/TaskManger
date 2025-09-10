@@ -99,8 +99,8 @@ export default function Mainpage() {
         Welcome to Task Manager
       </h1>
 
-      {/* Task Form */}
-      <div className="max-w-md w-full mt-10 bg-white p-6 rounded-lg shadow-lg">
+      {/* add task form*/}
+      <div className="max-w-xl w-full mt-10 bg-white p-6 rounded-lg shadow-lg">
         <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
           <div className="flex flex-col">
             <label htmlFor="title" className="mb-1 font-medium text-gray-700">
@@ -161,18 +161,17 @@ export default function Mainpage() {
       </div>
 
       {/* Task List */}
-      <div className="max-w-2xl mx-auto p-4 mt-10">
-        <h2 className="text-3xl font-bold mb-4 text-blue-800">All Tasks</h2>
+      <div className="max-w-xl w-full mt-10 bg-white p-6 rounded-lg shadow-lg">
+        <h2 className="text-2xl font-bold mb-4 text-blue-800">All Tasks</h2>
         {loading && <p>Loading tasks...</p>}
         {error && <p className="text-red-500">{error}</p>}
 
-        <ul className="space-y-3 w-full max-w-2xl mx-auto">
+        <ol className="space-y-3 max-h-96 overflow-y-auto pr-2">
           {taskData.map((task) => (
             <li
               key={task._id}
-              className="p-4 bg-white rounded-xl shadow-md flex justify-between items-start hover:shadow-lg transition-shadow"
+              className="p-4 bg-gray-50 rounded-lg shadow-sm flex justify-between items-start hover:shadow-md transition-shadow"
             >
-              {/* Task Info / Edit Mode */}
               {editingTaskId === task._id ? (
                 <div className="flex-1 pr-4 space-y-2">
                   <input
@@ -227,7 +226,7 @@ export default function Mainpage() {
                 </div>
               )}
 
-              {/* Action Icons */}
+              {/* icons */}
               {editingTaskId !== task._id && (
                 <div className="flex gap-3 items-center">
                   <button
@@ -237,7 +236,7 @@ export default function Mainpage() {
                     className="text-green-500 hover:text-green-700"
                     title="Mark Completed"
                   >
-                    <FaCheck size={22} />
+                    <FaCheck size={30} />
                   </button>
                   <button
                     onClick={() =>
@@ -246,7 +245,7 @@ export default function Mainpage() {
                     className="text-yellow-500 hover:text-yellow-700"
                     title="Mark Pending"
                   >
-                    <FaUndo size={22} />
+                    <FaUndo size={30} />
                   </button>
                   <button
                     onClick={() => {
@@ -259,20 +258,20 @@ export default function Mainpage() {
                     className="text-blue-500 hover:text-blue-700"
                     title="Edit Task"
                   >
-                    <FaEdit size={22} />
+                    <FaEdit size={30} />
                   </button>
                   <button
                     onClick={() => handleDelete(task._id)}
                     className="text-red-500 hover:text-red-700"
                     title="Delete Task"
                   >
-                    <FaTrash size={22} />
+                    <FaTrash size={30} />
                   </button>
                 </div>
               )}
             </li>
           ))}
-        </ul>
+        </ol>
       </div>
     </div>
   );
