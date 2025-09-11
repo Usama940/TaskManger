@@ -54,7 +54,7 @@ export default function Mainpage() {
       setTaskData(res.data);
     } catch (err) {
       console.error("Error while getting tasks:", err);
-      setError("Failed to fetch tasks. Please try again.");
+      setError("Task not Found");
     } finally {
       setLoading(false);
     }
