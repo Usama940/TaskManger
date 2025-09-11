@@ -76,7 +76,7 @@ export default function Mainpage() {
       setEditingTaskId(null);
     } catch (error) {
       console.error("Error updating task:", error);
-      setError("Failed to update task. Please try again.");
+      setError("Task not Found");
     }
   };
 
