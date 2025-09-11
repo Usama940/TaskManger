@@ -1,8 +1,10 @@
 import axios from "axios";
 import React, { useState, useEffect } from "react";
 import { FaEdit, FaTrash, FaCheck, FaUndo } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 export default function Mainpage() {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({ title: "", description: "" });
   const [errors, setErrors] = useState({ title: "", description: "" });
   const [taskData, setTaskData] = useState([]);
@@ -10,12 +12,14 @@ export default function Mainpage() {
   const [error, setError] = useState("");
   const [editingTaskId, setEditingTaskId] = useState(null);
   const [editForm, setEditForm] = useState({ title: "", description: "" });
+  const [logout, setlogout] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
     setErrors({ ...errors, [e.target.name]: "" });
   };
 
+  // post request
   const handleSubmit = async (e) => {
     e.preventDefault();
     const newErrors = {};
@@ -42,7 +46,7 @@ export default function Mainpage() {
       setError("Error at task post. Please try again.");
     }
   };
-
+  // all tasks
   const getAllTasks = async () => {
     setLoading(true);
     setError("");
@@ -93,8 +97,39 @@ export default function Mainpage() {
     }
   };
 
+  const logoutUser = async () => {
+    const token = localStorage.getItem("token");
+    try {
+      const res = await axios.post(
+        "http://localhost:8800/api/user/logout",
+        formData,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      localStorage.removeItem(token);
+      axios.defaults.headers.common["Authorization"] = null;
+      setlogout(true);
+      navigate("/login");
+    } catch (error) {
+      console.log("error while log out:", error);
+    }
+  };
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center p-4">
+      <div>
+        {logout ? (
+          <p className="fixed top-4 right-4 font-bold text-gray-700">
+            You are logged out.
+          </p>
+        ) : (
+          <button
+            onClick={logoutUser}
+            className="fixed top-4 right-4 px-4 py-2 bg-blue-500 text-white rounded shadow hover:bg-blue-600 transition-colors"
+          >
+            Logout
+          </button>
+        )}
+      </div>
+
       <h1 className="text-5xl text-blue-800 font-bold text-center mt-10">
         Welcome to Task Manager
       </h1>

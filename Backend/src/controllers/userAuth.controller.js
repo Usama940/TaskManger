@@ -76,3 +76,12 @@ export const login = async (req, res) => {
     return res.status(500).json({ message: "Server error at login" });
   }
 };
+
+export const logout = async (req, res) => {
+  try {
+    res.status(200).json({ messege: "user logout successfuly" });
+  } catch (error) {
+    console.log("error at the logout: ", error);
+    res.status(500).json({ messege: "internal server error at the logout " });
+  }
+};

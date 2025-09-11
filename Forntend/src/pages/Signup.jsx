@@ -22,7 +22,7 @@ export default function Signup() {
         formData
       );
       console.log("Signup success:", res.data);
-      alert("Signup successful!");
+
       navigate("/login");
     } catch (err) {
       console.error("Signup error:", err.response?.data || err.message);
