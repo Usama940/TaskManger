@@ -98,7 +98,14 @@ export const resetPassword = async (req, res) => {
     if (!validateEmail) {
       return res.status(400).json({ message: "Email address incorrect" });
     }
-    const tokenstring = crypto.randomBytes;
+    const tokenstring = crypto.randomBytes(32).toString("hex");
+    const token = new token({
+      userId: User._id,
+      token: tokenstring,
+    });
+    await token.save;
+
+    const transpoter = nodemailer.createTransport({});
     res
       .status(200)
       .json({ message: "Email validated, proceed to reset password" });
