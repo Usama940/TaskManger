@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 
 export default function Mainpage() {
   const navigate = useNavigate();
+
   const [formData, setFormData] = useState({ title: "", description: "" });
   const [errors, setErrors] = useState({ title: "", description: "" });
   const [taskData, setTaskData] = useState([]);
@@ -12,16 +13,28 @@ export default function Mainpage() {
   const [error, setError] = useState("");
   const [editingTaskId, setEditingTaskId] = useState(null);
   const [editForm, setEditForm] = useState({ title: "", description: "" });
-  const [logout, setlogout] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      setIsLoggedIn(true);
+      getAllTasks();
+    } else {
+      setIsLoggedIn(false);
+      setTaskData([]);
+    }
+  }, []);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
     setErrors({ ...errors, [e.target.name]: "" });
   };
 
-  // post request
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!isLoggedIn) return;
+
     const newErrors = {};
     if (!formData.title.trim()) newErrors.title = "Title is required";
     if (!formData.description.trim())
@@ -46,7 +59,7 @@ export default function Mainpage() {
       setError("Error at task post. Please try again.");
     }
   };
-  // all tasks
+
   const getAllTasks = async () => {
     setLoading(true);
     setError("");
@@ -58,17 +71,14 @@ export default function Mainpage() {
       setTaskData(res.data);
     } catch (err) {
       console.error("Error while getting tasks:", err);
-      setError("Task not Found");
+      setError("Task not found");
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    getAllTasks();
-  }, []);
-
   const handleUpdate = async (id, updatedData) => {
+    if (!isLoggedIn) return;
     const token = localStorage.getItem("token");
     try {
       const res = await axios.put(
@@ -80,11 +90,12 @@ export default function Mainpage() {
       setEditingTaskId(null);
     } catch (error) {
       console.error("Error updating task:", error);
-      setError("Task not Found");
+      setError("Task not found");
     }
   };
 
   const handleDelete = async (id) => {
+    if (!isLoggedIn) return;
     const token = localStorage.getItem("token");
     try {
       await axios.delete(`http://localhost:8800/api/task/tasks/${id}`, {
@@ -100,32 +111,37 @@ export default function Mainpage() {
   const logoutUser = async () => {
     const token = localStorage.getItem("token");
     try {
-      const res = await axios.post(
+      await axios.post(
         "http://localhost:8800/api/user/logout",
-        formData,
+        {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      localStorage.removeItem(token);
-      axios.defaults.headers.common["Authorization"] = null;
-      setlogout(true);
-      navigate("/login");
+      localStorage.removeItem("token");
+      delete axios.defaults.headers.common["Authorization"];
+      setIsLoggedIn(false);
+      setTaskData([]);
+      navigate("/");
     } catch (error) {
-      console.log("error while log out:", error);
+      console.log("Error while logging out:", error);
     }
   };
+
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center p-4">
       <div>
-        {logout ? (
-          <p className="fixed top-4 right-4 font-bold text-gray-700">
-            You are logged out.
-          </p>
-        ) : (
+        {isLoggedIn ? (
           <button
             onClick={logoutUser}
             className="fixed top-4 right-4 px-4 py-2 bg-blue-500 text-white rounded shadow hover:bg-blue-600 transition-colors"
           >
             Logout
+          </button>
+        ) : (
+          <button
+            onClick={() => navigate("/login")}
+            className="fixed top-4 right-4 px-4 py-2 bg-blue-500 text-white rounded shadow hover:bg-blue-600 transition-colors"
+          >
+            Login
           </button>
         )}
       </div>
@@ -134,72 +150,79 @@ export default function Mainpage() {
         Welcome to Task Manager
       </h1>
 
-      {/* add task form*/}
-      <div className="max-w-xl w-full mt-10 bg-white p-6 rounded-lg shadow-lg">
-        <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-          <div className="flex flex-col">
-            <label htmlFor="title" className="mb-1 font-medium text-gray-700">
-              Title
-            </label>
-            <input
-              type="text"
-              name="title"
-              id="title"
-              placeholder="Enter task title"
-              value={formData.title}
-              onChange={handleChange}
-              className={`border rounded-lg p-2 focus:outline-none focus:ring-2 ${
-                errors.title
-                  ? "border-red-500 focus:ring-red-400"
-                  : "border-gray-300 focus:ring-blue-400"
-              }`}
-            />
-            {errors.title && (
-              <span className="text-red-500 text-sm mt-1">{errors.title}</span>
-            )}
-          </div>
+      {/* Add task form */}
+      {isLoggedIn && (
+        <div className="max-w-xl w-full mt-10 bg-white p-6 rounded-lg shadow-lg">
+          <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+            <div className="flex flex-col">
+              <label htmlFor="title" className="mb-1 font-medium text-gray-700">
+                Title
+              </label>
+              <input
+                type="text"
+                name="title"
+                id="title"
+                placeholder="Enter task title"
+                value={formData.title}
+                onChange={handleChange}
+                className={`border rounded-lg p-2 focus:outline-none focus:ring-2 ${
+                  errors.title
+                    ? "border-red-500 focus:ring-red-400"
+                    : "border-gray-300 focus:ring-blue-400"
+                }`}
+              />
+              {errors.title && (
+                <span className="text-red-500 text-sm mt-1">
+                  {errors.title}
+                </span>
+              )}
+            </div>
 
-          <div className="flex flex-col">
-            <label
-              htmlFor="description"
-              className="mb-1 font-medium text-gray-700"
+            <div className="flex flex-col">
+              <label
+                htmlFor="description"
+                className="mb-1 font-medium text-gray-700"
+              >
+                Description
+              </label>
+              <input
+                type="text"
+                name="description"
+                id="description"
+                placeholder="Enter task description"
+                value={formData.description}
+                onChange={handleChange}
+                className={`border rounded-lg p-2 focus:outline-none focus:ring-2 ${
+                  errors.description
+                    ? "border-red-500 focus:ring-red-400"
+                    : "border-gray-300 focus:ring-blue-400"
+                }`}
+              />
+              {errors.description && (
+                <span className="text-red-500 text-sm mt-1">
+                  {errors.description}
+                </span>
+              )}
+            </div>
+
+            <button
+              type="submit"
+              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-colors"
             >
-              Description
-            </label>
-            <input
-              type="text"
-              name="description"
-              id="description"
-              placeholder="Enter task description"
-              value={formData.description}
-              onChange={handleChange}
-              className={`border rounded-lg p-2 focus:outline-none focus:ring-2 ${
-                errors.description
-                  ? "border-red-500 focus:ring-red-400"
-                  : "border-gray-300 focus:ring-blue-400"
-              }`}
-            />
-            {errors.description && (
-              <span className="text-red-500 text-sm mt-1">
-                {errors.description}
-              </span>
-            )}
-          </div>
+              Add Task
+            </button>
+          </form>
+        </div>
+      )}
 
-          <button
-            type="submit"
-            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-colors"
-          >
-            Add Task
-          </button>
-        </form>
-      </div>
-
-      {/* Task List */}
+      {/* Task list */}
       <div className="max-w-xl w-full mt-10 bg-white p-6 rounded-lg shadow-lg">
         <h2 className="text-2xl font-bold mb-4 text-blue-800">All Tasks</h2>
         {loading && <p>Loading tasks...</p>}
         {error && <p className="text-red-500">{error}</p>}
+        {!isLoggedIn && (
+          <p className="text-gray-500">Login to see your tasks.</p>
+        )}
 
         <ol className="space-y-3 max-h-96 overflow-y-auto pr-2">
           {taskData.map((task) => (
@@ -261,7 +284,7 @@ export default function Mainpage() {
                 </div>
               )}
 
-              {/* icons */}
+              {/* Icons */}
               {editingTaskId !== task._id && (
                 <div className="flex gap-3 items-center">
                   <button

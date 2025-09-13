@@ -1,6 +1,8 @@
 import { generateToken } from "../lib/Token.js";
 import User from "../models/userAuth.model.js";
 import bcrypt from "bcrypt";
+import nodemailer from "nodemailer";
+import crypto from "crypto";
 
 const saltRounds = 10;
 
@@ -83,5 +85,24 @@ export const logout = async (req, res) => {
   } catch (error) {
     console.log("error at the logout: ", error);
     res.status(500).json({ messege: "internal server error at the logout " });
+  }
+};
+
+export const resetPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" });
+    }
+    const validateEmail = await User.findOne({ email });
+    if (!validateEmail) {
+      return res.status(400).json({ message: "Email address incorrect" });
+    }
+    const tokenstring = crypto.randomBytes;
+    res
+      .status(200)
+      .json({ message: "Email validated, proceed to reset password" });
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
   }
 };

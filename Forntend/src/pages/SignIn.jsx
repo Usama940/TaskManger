@@ -74,7 +74,21 @@ export default function SignIn() {
               required
             />
           </div>
-
+          <div className="flex justify-between">
+            <div>
+              <a
+                href="http://localhost:5173/signup"
+                className="text-blue-500 hover:text-blue-800"
+              >
+                Signup
+              </a>
+            </div>
+            <div>
+              <a href="#" className="text-blue-500 hover:text-blue-800 ">
+                Forget Password?
+              </a>
+            </div>
+          </div>
           <button
             type="submit"
             className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition"
